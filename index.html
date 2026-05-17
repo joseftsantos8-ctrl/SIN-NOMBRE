@@ -117,10 +117,39 @@
 
                     <!-- GERENCIA -->
                     <div id="gerencia-panel" class="role-panel hidden">
-                        <div class="task-section mt-4">
-                            <h3><i class="fa-solid fa-sitemap"></i> Agrupación por Roles de Tienda</h3>
-                            <div class="roles-grid" id="roles-container">
-                                <!-- Se llenará con JS -->
+                        <div id="agrupacion-roles-view">
+                            <div class="task-section mt-4">
+                                <h3><i class="fa-solid fa-sitemap"></i> Agrupación por Roles de Tienda</h3>
+                                <div class="roles-grid" id="roles-container">
+                                    <!-- Se llenará con JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="dashboard-ejecutivo-view" class="hidden">
+                            <div class="task-section">
+                                <h3><i class="fa-solid fa-gauge-high"></i> Indicadores Clave</h3>
+                                <div id="gauges-row" class="gauges-row">
+                                    <!-- 4 velocímetros generados por JS -->
+                                </div>
+                            </div>
+                            <div class="task-section mt-4">
+                                <h3><i class="fa-solid fa-users-line"></i> Progreso por Líder</h3>
+                                <div class="table-container" id="tabla-lideres" style="padding:1rem;">
+                                    <!-- Tabla generada por JS -->
+                                </div>
+                            </div>
+                            <div class="task-section mt-4">
+                                <h3><i class="fa-solid fa-arrow-trend-down"></i> Control de Merma y Averías</h3>
+                                <div id="merma-cards" class="merma-cards-grid">
+                                    <!-- Cards generadas por JS -->
+                                </div>
+                            </div>
+                            <div class="task-section mt-4">
+                                <h3><i class="fa-solid fa-clock-rotate-left"></i> Historial Reciente</h3>
+                                <div class="table-container" id="historial-mermas" style="padding:1rem;">
+                                    <!-- Tabla generada por JS -->
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -174,6 +203,10 @@
                                     <div class="input-group">
                                         <input type="text" id="tarea-desc" placeholder="Descripción breve" required>
                                     </div>
+                                    <div class="input-group">
+                                        <label for="tarea-deadline" style="color:var(--text-secondary); font-size:0.85rem; display:block; margin-bottom:0.3rem;">Fecha/hora límite (opcional, por defecto 24h):</label>
+                                        <input type="datetime-local" id="tarea-deadline" style="width:100%; padding:0.6rem; background:rgba(0,0,0,0.2); border-radius:8px; color:white; border:none;">
+                                    </div>
                                     <div class="modal-actions">
                                         <button type="button" class="btn-secondary" id="btn-cerrar-modal">Cancelar</button>
                                         <button type="submit" class="btn-primary">Asignar</button>
@@ -188,12 +221,13 @@
                         <div id="inventario-generar-view">
                             <div class="hero-card glass-panel" style="padding: 2rem;">
                                 <h2><i class="fa-solid fa-boxes-stacked"></i> Generador de Inventario Cíclico</h2>
-                                
+
+                                <div id="asignaciones-categorias" style="margin-top:1rem;">
+                                    <!-- Acordeón de asignación de categorías inyectado por JS -->
+                                </div>
+
                                 <div class="action-bar" style="justify-content: flex-start; align-items: center; gap: 1rem; margin-top:1rem;">
-                                    <select id="inv-colaborador-select" class="input-group" style="margin:0; padding:0.8rem; background:rgba(0,0,0,0.2); color:white; border-radius:8px;">
-                                        <!-- Se llena con JS -->
-                                    </select>
-                                    <button class="btn-primary" id="btn-enviar-inv-manual"><i class="fa-solid fa-paper-plane"></i> Asignar Selección</button>
+                                    <button class="btn-primary" id="btn-enviar-inv-manual"><i class="fa-solid fa-paper-plane"></i> Generar Inventario Dividido</button>
                                     <span class="selection-counter" id="inv-counter">0 / 20 seleccionados</span>
                                 </div>
 
@@ -343,7 +377,66 @@
 
     </div>
 
+        <div id="modal-registrar-merma" class="modal hidden">
+            <div class="modal-content glass-panel" style="max-width: 500px;">
+                <h3><i class="fa-solid fa-arrow-trend-down"></i> Registrar Merma / Avería</h3>
+                <p style="color:var(--text-secondary); margin-bottom:1rem;">Captura una pérdida que no provenga del inventario cíclico (avería, vencimiento, robo, etc.).</p>
+                <form id="form-registrar-merma" style="margin-top: 1rem;">
+                    <div class="input-group">
+                        <input type="text" id="merma-desc" placeholder="Producto" required>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="merma-ean" placeholder="EAN (opcional)">
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
+                        <div class="input-group">
+                            <input type="number" id="merma-cantidad" placeholder="Cantidad" min="1" required>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="merma-valor" placeholder="Valor ($)" min="0" step="0.01" required>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <select id="merma-motivo" required style="width:100%; padding:0.8rem; background:rgba(0,0,0,0.2); border-radius:8px; color:white;">
+                            <option value="Avería">Avería</option>
+                            <option value="Vencimiento">Vencimiento</option>
+                            <option value="Robo">Robo</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+                    <div class="modal-actions" style="margin-top:1rem;">
+                        <button type="button" class="btn-secondary" onclick="document.getElementById('modal-registrar-merma').classList.add('hidden')">Cancelar</button>
+                        <button type="submit" class="btn-primary"><i class="fa-solid fa-save"></i> Registrar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="modal-negativos" class="modal hidden">
+            <div class="modal-content glass-panel" style="max-width: 780px;">
+                <h3><i class="fa-solid fa-circle-exclamation"></i> Gestionar Negativos</h3>
+                <p style="color:var(--text-secondary); margin-bottom:1rem;">Productos físicos no listados en inventario. Agrega manualmente o revisa los reportados por colaboradores, y luego repártelos automáticamente.</p>
+
+                <form id="form-agregar-negativo" style="margin-bottom:1rem;">
+                    <div style="display:grid; grid-template-columns:1fr 2fr 1fr auto; gap:0.5rem; align-items:center;">
+                        <input type="text" id="neg-ean" placeholder="EAN" required style="padding:0.6rem; background:rgba(0,0,0,0.2); border-radius:8px; color:white; border:none;">
+                        <input type="text" id="neg-desc" placeholder="Descripción" required style="padding:0.6rem; background:rgba(0,0,0,0.2); border-radius:8px; color:white; border:none;">
+                        <input type="text" id="neg-cat" placeholder="Categoría" style="padding:0.6rem; background:rgba(0,0,0,0.2); border-radius:8px; color:white; border:none;">
+                        <button type="submit" class="btn-primary" style="padding:0.6rem 1rem;"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                </form>
+
+                <h4 style="margin:0.5rem 0;"><i class="fa-solid fa-list"></i> Negativos pendientes</h4>
+                <div id="negativos-lista" style="margin-bottom:1rem;"></div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="document.getElementById('modal-negativos').classList.add('hidden')">Cerrar</button>
+                    <button type="button" class="btn-primary" id="btn-repartir-negativos"><i class="fa-solid fa-share-nodes"></i> Repartir Negativos</button>
+                </div>
+            </div>
+        </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="app.js"></script>
+    <script type="module" src="main.js"></script>
 </body>
 </html>
