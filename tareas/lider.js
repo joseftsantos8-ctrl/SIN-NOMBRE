@@ -5,6 +5,7 @@ import { addNavLink } from '../shell/navegacion.js';
 import { showNotification } from '../shell/notificaciones.js';
 import { registrarAccion } from '../auditoria/auditoria.js';
 import { guardarTodo } from '../storage/persistencia.js';
+import { emitirNotificacion } from '../notificaciones-centro/centro.js';
 
 export function setupLider() {
     document.getElementById('lider-panel').classList.remove('hidden');
@@ -91,5 +92,11 @@ export function handleNuevaTarea(e) {
     e.target.reset();
     renderLiderTasks();
     registrarAccion(currentUser.id, 'Asignar tarea', `→ ${tareaCreada.assignedTo}: "${tareaCreada.type}"`);
+    emitirNotificacion({
+        destinatario: tareaCreada.assignedTo,
+        tipo: 'tarea-asignada',
+        titulo: `Nueva tarea: ${tareaCreada.type}`,
+        detalle: `${tareaCreada.desc} — asignada por ${currentUser.id}`
+    });
     showNotification('Tarea Asignada');
 }

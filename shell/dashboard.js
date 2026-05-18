@@ -5,6 +5,7 @@ import { setupLider } from '../tareas/lider.js';
 import { setupColaborador } from '../tareas/colaborador.js';
 import { setupInventario } from '../inventario/inventario.js';
 import { inyectarHerramientas } from './herramientas.js';
+import { actualizarBadge } from '../notificaciones-centro/centro.js';
 
 const loginView    = document.getElementById('login-view');
 const dashboardView = document.getElementById('dashboard-view');
@@ -18,8 +19,11 @@ export function showDashboard() {
         dashboardView.classList.add('active-view');
     }, 300);
 
-    document.getElementById('current-user-name').textContent = currentUser.name;
+    const nameEl = document.getElementById('current-user-name');
+    nameEl.textContent     = currentUser.name;
+    nameEl.dataset.userid  = currentUser.id;
     document.getElementById('current-user-role').textContent = currentUser.cargo || currentUser.role;
+    actualizarBadge();
 
     const sidebarAvatar = document.getElementById('sidebar-avatar');
     sidebarAvatar.innerHTML = currentUser.profilePic

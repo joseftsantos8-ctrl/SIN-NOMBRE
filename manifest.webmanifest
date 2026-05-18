@@ -1,0 +1,25 @@
+{
+  "name": "Sirena Market Vista Cana SP13",
+  "short_name": "Sirena SP13",
+  "description": "Sistema de gestión operativa de tienda",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#1e293b",
+  "theme_color": "#009fe3",
+  "orientation": "portrait-primary",
+  "lang": "es-DO",
+  "icons": [
+    {
+      "src": "imagen/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "imagen/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

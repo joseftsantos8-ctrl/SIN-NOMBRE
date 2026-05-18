@@ -5,12 +5,33 @@ import { renderColaboradorTasks } from './colaborador.js';
 import { derivarMermasDeInventario } from '../mermas/calculo.js';
 import { registrarAccion } from '../auditoria/auditoria.js';
 import { guardarTodo } from '../storage/persistencia.js';
+import { abrirCamaraParaEvidencia, capturarFoto, cerrarCamara } from '../evidencias/camara.js';
+import { registrarEvidencia, evidenciasDeTarea } from '../evidencias/data.js';
 
 let currentTaskExecuting = null;
+let evidenciaPendiente   = null;  // base64 de la foto capturada en esta sesión del modal
+
+function resetEvidenciaUI() {
+    evidenciaPendiente = null;
+    const preview = document.getElementById('ejecutar-evidencia-preview');
+    const img     = document.getElementById('ejecutar-evidencia-img');
+    const btn     = document.getElementById('btn-capturar-evidencia');
+    preview.style.display = 'none';
+    img.src = '';
+    btn.innerHTML = '<i class="fa-solid fa-camera"></i> Capturar Evidencia';
+}
+
+function setEvidenciaUI(base64) {
+    evidenciaPendiente = base64;
+    document.getElementById('ejecutar-evidencia-img').src = base64;
+    document.getElementById('ejecutar-evidencia-preview').style.display = 'block';
+    document.getElementById('btn-capturar-evidencia').innerHTML = '<i class="fa-solid fa-rotate"></i> Tomar otra';
+}
 
 window.abrirModalEjecutar = function(taskId) {
     const task = tasks.find(t => t.id === taskId);
     currentTaskExecuting = task;
+    resetEvidenciaUI();
     document.getElementById('ejecutar-titulo').textContent = task.type;
     document.getElementById('ejecutar-desc').textContent   = task.desc;
 
@@ -42,17 +63,37 @@ window.abrirModalEjecutar = function(taskId) {
                         <i class="fa-solid fa-circle-plus"></i> Reportar Negativo Encontrado
                     </button>`;
         }
-        container.innerHTML = html;
+        container.innerHTML += html;
     } else {
-        container.innerHTML = '<textarea id="ejecutar-obs" rows="4" style="width:100%" placeholder="Observaciones..."></textarea>';
+        container.innerHTML += '<textarea id="ejecutar-obs" rows="4" style="width:100%" placeholder="Observaciones..."></textarea>';
     }
     document.getElementById('modal-ejecutar-tarea').classList.remove('hidden');
 };
+
+export function handleCapturarEvidenciaClick() {
+    abrirCamaraParaEvidencia((base64) => {
+        setEvidenciaUI(base64);
+    });
+}
+
+export function handleCamaraCapturar() {
+    capturarFoto();
+}
+
+export function handleCamaraCancelar() {
+    cerrarCamara();
+}
 
 export function handleEjecutarTarea(e) {
     e.preventDefault();
     const task = currentTaskExecuting;
     const ahora = Date.now();
+
+    // BLOQUEO: evidencia fotográfica obligatoria
+    if (!evidenciaPendiente) {
+        alert('Debes capturar una evidencia fotográfica antes de completar la tarea.');
+        return;
+    }
 
     // Si la tarea está fuera de plazo, pedir justificación antes de cerrar.
     if (task.dueAt && ahora > task.dueAt) {
@@ -90,15 +131,24 @@ export function handleEjecutarTarea(e) {
     task.completedAt = ahora;
     if (task.assignedTo === 'TODOS') task.assignedTo = currentUser.id;
 
+    // Guardar evidencia asociada a la tarea
+    registrarEvidencia({
+        taskId: task.id,
+        usuario: currentUser.id,
+        area: task.type,
+        imagenBase64: evidenciaPendiente
+    });
+
     // Si fue inventario, derivar mermas por cada dif negativo
     const mermasCreadas = derivarMermasDeInventario(task);
 
     guardarTodo();
     document.getElementById('modal-ejecutar-tarea').classList.add('hidden');
+    resetEvidenciaUI();
     renderColaboradorTasks();
     const sufijoMerma  = mermasCreadas > 0 ? ` (${mermasCreadas} merma${mermasCreadas>1?'s':''} registrada${mermasCreadas>1?'s':''})` : '';
     const sufijoTarde  = task.fueTarde ? ' — completada con retraso justificado' : '';
-    registrarAccion(currentUser.id, 'Completar tarea', `"${task.type}"${task.fueTarde ? ' (TARDE: ' + task.justificacionRetraso + ')' : ''}`);
+    registrarAccion(currentUser.id, 'Completar tarea', `"${task.type}" + evidencia${task.fueTarde ? ' (TARDE: ' + task.justificacionRetraso + ')' : ''}`);
     showNotification(`Tarea completada${sufijoMerma}${sufijoTarde}.`);
 }
 
@@ -126,5 +176,27 @@ window.abrirModalResultados = function(taskId) {
         document.getElementById('res-thead').innerHTML = `<tr><th>Observaciones</th></tr>`;
         tbody.innerHTML = `<tr><td>${task.results.obs}</td></tr>`;
     }
+
+    // Mostrar evidencias asociadas
+    const evs = evidenciasDeTarea(task.id);
+    const evWrap = document.getElementById('res-evidencias');
+    if (evs.length === 0) {
+        evWrap.innerHTML = '<p style="color:var(--text-secondary); font-size:0.85rem; margin:0.5rem 0 0;">Sin evidencias registradas.</p>';
+    } else {
+        evWrap.innerHTML = `
+            <h4 style="margin:1rem 0 0.5rem;"><i class="fa-solid fa-camera"></i> Evidencias (${evs.length})</h4>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px,1fr)); gap:0.6rem;">
+                ${evs.map(ev => `
+                    <div style="background:rgba(0,0,0,0.2); padding:0.4rem; border-radius:8px;">
+                        <img src="${ev.imagenBase64}" style="width:100%; aspect-ratio:1; object-fit:cover; border-radius:6px;">
+                        <small style="display:block; color:var(--text-secondary); margin-top:0.3rem;">
+                            ${ev.usuario} · ${new Date(ev.fecha).toLocaleString('es-DO', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })}
+                        </small>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
     document.getElementById('modal-ver-resultados').classList.remove('hidden');
 };

@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#009fe3">
+    <link rel="apple-touch-icon" href="imagen/logo.png">
 </head>
 <body>
     <div id="app">
@@ -49,6 +52,10 @@
                         <span id="current-user-name">Usuario</span>
                         <span id="current-user-role" class="badge">Rol</span>
                     </div>
+                    <button id="btn-notif-centro" title="Centro de notificaciones" style="background:rgba(0,0,0,0.25); border:none; color:white; padding:0.5rem 0.7rem; border-radius:50%; cursor:pointer; position:relative; margin-left:auto;">
+                        <i class="fa-solid fa-bell"></i>
+                        <span id="notif-badge" class="hidden" style="position:absolute; top:-4px; right:-4px; background:#ef4444; color:white; font-size:0.65rem; font-weight:700; padding:2px 6px; border-radius:10px; min-width:18px; text-align:center;">0</span>
+                    </button>
                 </div>
 
                 <ul class="nav-links" id="nav-links">
@@ -59,8 +66,12 @@
             </nav>
 
             <main class="main-content">
-                <header class="top-header">
-                    <h1 id="page-title">Bienvenido</h1>
+                <header class="top-header" style="display:flex; align-items:center; gap:1rem;">
+                    <h1 id="page-title" style="flex:1;">Bienvenido</h1>
+                    <button id="btn-busqueda-global" title="Búsqueda global (Ctrl+K)" style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.1); color:white; padding:0.6rem 1rem; border-radius:8px; cursor:pointer; display:flex; align-items:center; gap:0.5rem; font-size:0.9rem;">
+                        <i class="fa-solid fa-magnifying-glass"></i> Buscar
+                        <kbd style="background:rgba(255,255,255,0.1); padding:0.1rem 0.4rem; border-radius:4px; font-size:0.75rem;">Ctrl+K</kbd>
+                    </button>
                     <div class="date-display" id="current-date"></div>
                 </header>
 
@@ -259,11 +270,159 @@
                     <div id="ejecutar-dinamico-container">
                         <!-- Campos inyectados por JS según el tipo de tarea -->
                     </div>
+
+                    <!-- Evidencia fotográfica obligatoria -->
+                    <div id="ejecutar-evidencia-box" style="background:rgba(0,0,0,0.2); padding:0.8rem; border-radius:10px; margin-top:1rem; border-left:4px solid #f59e0b;">
+                        <h4 style="margin:0 0 0.5rem;"><i class="fa-solid fa-camera"></i> Evidencia fotográfica <span style="color:#f59e0b; font-size:0.85rem;">(obligatoria)</span></h4>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); margin:0 0 0.6rem;">Captura una foto del trabajo realizado. Solo se permite usar la cámara (galería bloqueada).</p>
+                        <div id="ejecutar-evidencia-preview" style="display:none; margin-bottom:0.6rem;">
+                            <img id="ejecutar-evidencia-img" style="width:100%; max-height:240px; object-fit:contain; background:#000; border-radius:8px;">
+                        </div>
+                        <button type="button" id="btn-capturar-evidencia" class="btn-secondary" style="width:100%;">
+                            <i class="fa-solid fa-camera"></i> Capturar Evidencia
+                        </button>
+                    </div>
+
                     <div class="modal-actions">
                         <button type="button" class="btn-secondary" onclick="document.getElementById('modal-ejecutar-tarea').classList.add('hidden')">Cancelar</button>
                         <button type="submit" class="btn-primary"><i class="fa-solid fa-check-to-slot"></i> Completar y Guardar</button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <!-- MODAL: Reportes exportables -->
+        <div id="modal-reportes" class="modal hidden">
+            <div class="modal-content glass-panel" style="max-width: 700px;">
+                <h3><i class="fa-solid fa-file-export"></i> Reportes Exportables</h3>
+                <p style="color:var(--text-secondary); margin-bottom:1rem;">Exporta cualquier sección del sistema como CSV (compatible Excel) o XLSX nativo.</p>
+                <table class="custom-table" style="width:100%;">
+                    <thead><tr><th>Reporte</th><th>Formato</th></tr></thead>
+                    <tbody id="reportes-tabla">
+                        <!-- llenado por JS -->
+                    </tbody>
+                </table>
+                <div class="modal-actions" style="margin-top:1rem;">
+                    <button type="button" class="btn-secondary" onclick="document.getElementById('modal-reportes').classList.add('hidden')">Cerrar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: Escáner de código de barras -->
+        <div id="modal-escaner" class="modal hidden">
+            <div class="modal-content glass-panel" style="max-width: 640px;">
+                <h3><i class="fa-solid fa-barcode"></i> Escáner Código de Barras</h3>
+                <p style="color:var(--text-secondary); margin-bottom:0.8rem; font-size:0.9rem;">
+                    <i class="fa-solid fa-circle-info"></i> Apunta la cámara al código. Funciona en Chrome/Edge con cámara.
+                </p>
+                <div style="position:relative; background:#000; border-radius:8px; overflow:hidden;">
+                    <video id="escaner-video" autoplay playsinline muted style="width:100%; max-height:380px; display:block;"></video>
+                </div>
+                <div id="escaner-error" class="hidden" style="background:rgba(239,68,68,0.15); border-left:4px solid #ef4444; padding:0.6rem 1rem; border-radius:6px; margin-top:0.8rem; color:#fca5a5;"></div>
+                <div id="escaner-resultado" class="hidden" style="background:rgba(16,185,129,0.15); border-left:4px solid #10b981; padding:0.8rem 1rem; border-radius:6px; margin-top:0.8rem;"></div>
+                <div class="modal-actions" style="margin-top:1rem;">
+                    <button type="button" class="btn-secondary" id="btn-escaner-manual"><i class="fa-solid fa-keyboard"></i> Ingreso manual</button>
+                    <button type="button" class="btn-primary" id="btn-escaner-cerrar">Cerrar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: Búsqueda global -->
+        <div id="modal-busqueda" class="modal hidden">
+            <div class="modal-content glass-panel" style="max-width: 700px; max-height: 85vh; overflow-y: auto;">
+                <h3><i class="fa-solid fa-magnifying-glass"></i> Búsqueda Global</h3>
+                <input type="text" id="busqueda-input" placeholder="Buscar productos, tareas, usuarios, mermas, pedidos, materiales..." style="width:100%; padding:0.8rem 1rem; background:rgba(0,0,0,0.25); border:none; border-radius:8px; color:white; font-size:1rem; margin:0.5rem 0 1rem;">
+                <div id="busqueda-resultados"></div>
+                <div class="modal-actions" style="margin-top:1rem;">
+                    <button type="button" class="btn-secondary" onclick="document.getElementById('modal-busqueda').classList.add('hidden')">Cerrar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: Centro de notificaciones -->
+        <div id="modal-notif-centro" class="modal hidden">
+            <div class="modal-content glass-panel" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
+                <h3><i class="fa-solid fa-bell"></i> Centro de Notificaciones</h3>
+                <p style="color:var(--text-secondary); margin-bottom:1rem;">Tus notificaciones recientes. Haz clic en una para marcarla como leída.</p>
+                <div id="notif-lista" style="margin-bottom:1rem;"></div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="btn-notif-marcar-leidas"><i class="fa-solid fa-check-double"></i> Marcar todas leídas</button>
+                    <button type="button" class="btn-primary" onclick="document.getElementById('modal-notif-centro').classList.add('hidden')">Cerrar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: Solicitudes de suministros -->
+        <div id="modal-solicitudes" class="modal hidden">
+            <div class="modal-content glass-panel" style="max-width: 1000px; max-height: 92vh; overflow-y: auto;">
+                <h3><i class="fa-solid fa-boxes-packing"></i> Solicitudes de Suministros</h3>
+                <p style="color:var(--text-secondary); margin-bottom:1rem;">Crea una solicitud de materiales para tu área. Las solicitudes pasan por aprobación antes de entregarse.</p>
+
+                <form id="form-agregar-fila-sol" style="background:rgba(0,0,0,0.15); padding:1rem; border-radius:10px; margin-bottom:1rem;">
+                    <div style="display:grid; grid-template-columns:1fr 2fr 1fr auto; gap:0.5rem; align-items:end;">
+                        <select id="sol-area" required style="padding:0.5rem; background:rgba(0,0,0,0.3); color:white; border:none; border-radius:6px;"></select>
+                        <select id="sol-material" required style="padding:0.5rem; background:rgba(0,0,0,0.3); color:white; border:none; border-radius:6px;"></select>
+                        <input type="number" id="sol-cantidad" min="1" placeholder="Cantidad" required style="padding:0.5rem; background:rgba(0,0,0,0.3); color:white; border:none; border-radius:6px;">
+                        <button type="submit" class="btn-primary" style="padding:0.5rem 0.8rem;"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                </form>
+
+                <h4 style="margin:0.5rem 0;">Materiales en esta solicitud</h4>
+                <table class="custom-table" style="width:100%;">
+                    <thead><tr><th>Material</th><th>Disponible</th><th>Cantidad</th><th></th></tr></thead>
+                    <tbody id="sol-tbody"></tbody>
+                </table>
+                <button type="button" id="btn-enviar-solicitud" class="btn-primary" style="margin:0.8rem 0 1.5rem; width:100%;">
+                    <i class="fa-solid fa-paper-plane"></i> Enviar Solicitud
+                </button>
+
+                <h4 style="margin:0.5rem 0;"><i class="fa-solid fa-clock-rotate-left"></i> Historial de solicitudes</h4>
+                <div id="sol-lista"></div>
+
+                <div class="modal-actions" style="margin-top:1rem;">
+                    <button type="button" class="btn-secondary" onclick="document.getElementById('modal-solicitudes').classList.add('hidden')">Cerrar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: Inventario de materiales (suministros) -->
+        <div id="modal-inventario-suministros" class="modal hidden">
+            <div class="modal-content glass-panel" style="max-width: 1000px; max-height: 92vh; overflow-y: auto;">
+                <h3><i class="fa-solid fa-warehouse"></i> Inventario de Materiales</h3>
+                <p style="color:var(--text-secondary); margin-bottom:1rem;">Catálogo de materiales, alertas de bajo inventario y consumo reciente.</p>
+
+                <div id="mat-alertas" style="margin-bottom:1rem;"></div>
+
+                <h4 style="margin:0.5rem 0;"><i class="fa-solid fa-boxes-stacked"></i> Materiales</h4>
+                <table class="custom-table" style="width:100%;">
+                    <thead><tr><th>Material</th><th>Categoría</th><th>Stock</th><th>Mín.</th><th>Ubicación</th><th>Proveedor</th><th>Estado</th></tr></thead>
+                    <tbody id="mat-tbody"></tbody>
+                </table>
+
+                <div id="mat-consumos" style="margin-top:1.5rem;"></div>
+
+                <div class="modal-actions" style="margin-top:1rem;">
+                    <button type="button" class="btn-secondary" onclick="document.getElementById('modal-inventario-suministros').classList.add('hidden')">Cerrar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: Cámara para evidencias -->
+        <div id="modal-camara" class="modal hidden">
+            <div class="modal-content glass-panel" style="max-width: 640px;">
+                <h3><i class="fa-solid fa-camera"></i> Capturar Evidencia</h3>
+                <p style="color:var(--text-secondary); margin-bottom:0.8rem; font-size:0.9rem;">
+                    <i class="fa-solid fa-circle-info"></i> En móvil se usa la cámara trasera automáticamente. La galería está deshabilitada.
+                </p>
+                <div style="position:relative; background:#000; border-radius:8px; overflow:hidden;">
+                    <video id="camara-video" autoplay playsinline muted style="width:100%; max-height:420px; display:block;"></video>
+                </div>
+                <canvas id="camara-canvas" style="display:none;"></canvas>
+                <div id="camara-error" class="hidden" style="background:rgba(239,68,68,0.15); border-left:4px solid #ef4444; padding:0.6rem 1rem; border-radius:6px; margin-top:0.8rem; color:#fca5a5;"></div>
+                <div class="modal-actions" style="margin-top:1rem;">
+                    <button type="button" class="btn-secondary" id="btn-camara-cancelar">Cancelar</button>
+                    <button type="button" class="btn-primary" id="btn-camara-capturar"><i class="fa-solid fa-circle"></i> Capturar</button>
+                </div>
             </div>
         </div>
 
@@ -281,7 +440,8 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="modal-actions">
+                <div id="res-evidencias"><!-- Evidencias fotográficas asociadas --></div>
+                <div class="modal-actions" style="margin-top:1rem;">
                     <button type="button" class="btn-secondary" onclick="document.getElementById('modal-ver-resultados').classList.add('hidden')">Cerrar</button>
                 </div>
             </div>
