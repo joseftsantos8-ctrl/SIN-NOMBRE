@@ -19,7 +19,7 @@ export function showDashboard() {
     }, 300);
 
     document.getElementById('current-user-name').textContent = currentUser.name;
-    document.getElementById('current-user-role').textContent = currentUser.role;
+    document.getElementById('current-user-role').textContent = currentUser.cargo || currentUser.role;
 
     const sidebarAvatar = document.getElementById('sidebar-avatar');
     sidebarAvatar.innerHTML = currentUser.profilePic

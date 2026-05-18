@@ -33,6 +33,14 @@ export let tasks = [
     // --- H.ACOSTA (Sugerente) ---
     { id: 501, type: 'Control de Cajas', desc: 'Cuadre matutino', status: 'completed',
       assignedTo: 'J.AVILA',    assignedBy: 'H.ACOSTA', createdAt: HOY - 1*DIA,   dueAt: HOY - 16*HORA, completedAt: HOY - 18*HORA },
+
+    // --- A.DEOLEO (Líder JR Fresco y Centro Tienda) ---
+    { id: 601, type: 'Auditoría Frescura Deli', desc: 'Revisar empaque y rotación deli', status: 'completed',
+      assignedTo: 'A.CASTILLO', assignedBy: 'A.DEOLEO', createdAt: HOY - 1*DIA,   dueAt: HOY - 14*HORA, completedAt: HOY - 16*HORA },
+    { id: 602, type: 'Reposición Centro Tienda', desc: 'Verificar pasillos 6-10', status: 'pending',
+      assignedTo: 'E.CEDANO',   assignedBy: 'A.DEOLEO', createdAt: HOY - 5*HORA,  dueAt: HOY + 7*HORA,  completedAt: null },
+    { id: 603, type: 'Control Sanitario Frescos', desc: 'Temperaturas lácteos + deli', status: 'completed',
+      assignedTo: 'J.AVILA',    assignedBy: 'A.DEOLEO', createdAt: HOY - 2*DIA,   dueAt: HOY - 1*DIA - 6*HORA, completedAt: HOY - 1*DIA - 8*HORA },
 ];
 
 export let novedades = [];

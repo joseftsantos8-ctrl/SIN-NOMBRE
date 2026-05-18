@@ -10,6 +10,10 @@ import { showNotification } from './shell/notificaciones.js';
 import { products } from './inventario/productos.js';
 import { abrirModalNegativos, handleAgregarNegativo, repartirNegativos } from './inventario/negativos.js';
 import { handleRegistrarMerma } from './mermas/registro.js';
+import { handleEnviarPedidoVegetales } from './pedidos/vegetales.js';
+import { handleEnviarPedidoCarnes } from './pedidos/carnes.js';
+import { handleAgregarFilaLevantamiento, handleGuardarLevantamiento } from './frescos/levantamiento.js';
+import { handleFiltroAuditoria, registrarAccion } from './auditoria/auditoria.js';
 
 // Exponer para handlers inline en HTML dinámico
 window.abrirModalPerfil = abrirModalPerfil;
@@ -29,8 +33,10 @@ document.getElementById('login-form').addEventListener('submit', (e) => {
 
     if (user) {
         document.getElementById('login-error').classList.add('hidden');
+        registrarAccion(userId, 'Login exitoso', `Rol: ${user.role}`);
         showDashboard();
     } else {
+        registrarAccion(userId || '(desconocido)', 'Login fallido', '');
         document.getElementById('login-error').classList.remove('hidden');
         const form = document.getElementById('login-form');
         form.classList.add('error');
@@ -39,6 +45,8 @@ document.getElementById('login-form').addEventListener('submit', (e) => {
 });
 
 document.getElementById('logout-btn').addEventListener('click', () => {
+    const idActual = document.getElementById('current-user-name').textContent || '(desconocido)';
+    registrarAccion(idActual, 'Logout', '');
     logout();
     hideDashboard();
     document.getElementById('username').value = '';
@@ -122,6 +130,19 @@ document.getElementById('btn-repartir-negativos').addEventListener('click', repa
 
 // --- Mermas ---
 document.getElementById('form-registrar-merma').addEventListener('submit', handleRegistrarMerma);
+
+// --- Pedidos vegetales ---
+document.getElementById('form-pedido-vegetales').addEventListener('submit', handleEnviarPedidoVegetales);
+
+// --- Pedidos carnes ---
+document.getElementById('form-pedido-carnes').addEventListener('submit', handleEnviarPedidoCarnes);
+
+// --- Levantamiento de Frescos ---
+document.getElementById('form-agregar-fila-lev').addEventListener('submit', handleAgregarFilaLevantamiento);
+document.getElementById('btn-guardar-levantamiento').addEventListener('click', handleGuardarLevantamiento);
+
+// --- Auditoría ---
+document.getElementById('auditoria-filtro').addEventListener('input', handleFiltroAuditoria);
 
 // --- Perfil de usuario ---
 document.getElementById('perfil-foto-input').addEventListener('change', function() {

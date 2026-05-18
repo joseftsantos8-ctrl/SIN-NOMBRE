@@ -1,5 +1,7 @@
 import { registrarMerma } from './data.js';
 import { showNotification } from '../shell/notificaciones.js';
+import { currentUser } from '../autenticacion/auth.js';
+import { registrarAccion } from '../auditoria/auditoria.js';
 
 export function abrirModalRegistrarMerma() {
     const modal = document.getElementById('modal-registrar-merma');
@@ -21,6 +23,7 @@ export function handleRegistrarMerma(e) {
     }
 
     registrarMerma({ productoDesc, ean, cantidad, valor, motivo, origen: 'manual' });
+    registrarAccion(currentUser?.id || '(desconocido)', 'Registrar merma', `${productoDesc} x${cantidad} ($${valor}) — ${motivo}`);
     document.getElementById('modal-registrar-merma').classList.add('hidden');
     showNotification(`Merma registrada: ${productoDesc} x${cantidad}`);
 }

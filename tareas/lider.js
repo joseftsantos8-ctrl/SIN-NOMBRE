@@ -3,6 +3,7 @@ import { users } from '../usuarios/data.js';
 import { currentUser } from '../autenticacion/auth.js';
 import { addNavLink } from '../shell/navegacion.js';
 import { showNotification } from '../shell/notificaciones.js';
+import { registrarAccion } from '../auditoria/auditoria.js';
 
 export function setupLider() {
     document.getElementById('lider-panel').classList.remove('hidden');
@@ -83,8 +84,10 @@ export function handleNuevaTarea(e) {
         dueAt,
         completedAt: null
     });
+    const tareaCreada = tasks[tasks.length - 1];
     document.getElementById('modal-nueva-tarea').classList.add('hidden');
     e.target.reset();
     renderLiderTasks();
+    registrarAccion(currentUser.id, 'Asignar tarea', `→ ${tareaCreada.assignedTo}: "${tareaCreada.type}"`);
     showNotification('Tarea Asignada');
 }

@@ -3,6 +3,7 @@ import { currentUser } from '../autenticacion/auth.js';
 import { showNotification } from '../shell/notificaciones.js';
 import { renderColaboradorTasks } from './colaborador.js';
 import { derivarMermasDeInventario } from '../mermas/calculo.js';
+import { registrarAccion } from '../auditoria/auditoria.js';
 
 let currentTaskExecuting = null;
 
@@ -14,6 +15,18 @@ window.abrirModalEjecutar = function(taskId) {
 
     const container   = document.getElementById('ejecutar-dinamico-container');
     container.innerHTML = '';
+
+    // Aviso visual si la tarea ya está vencida
+    if (task.dueAt && Date.now() > task.dueAt) {
+        container.innerHTML = `
+            <div style="background:rgba(239,68,68,0.15); border-left:4px solid #ef4444; padding:0.8rem 1rem; border-radius:8px; margin-bottom:1rem;">
+                <strong style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Tarea vencida</strong>
+                <p style="margin:0.3rem 0 0; font-size:0.85rem; color:var(--text-secondary);">
+                    Al completar se te pedirá una justificación obligatoria del retraso.
+                </p>
+            </div>
+        `;
+    }
 
     if (task.data) {
         const esInventario = task.type === 'Inventario Cíclico' || task.type === 'Verificación Negativos';
@@ -38,6 +51,26 @@ window.abrirModalEjecutar = function(taskId) {
 export function handleEjecutarTarea(e) {
     e.preventDefault();
     const task = currentTaskExecuting;
+    const ahora = Date.now();
+
+    // Si la tarea está fuera de plazo, pedir justificación antes de cerrar.
+    if (task.dueAt && ahora > task.dueAt) {
+        const transcurridoMs = ahora - task.dueAt;
+        const horasTarde = Math.floor(transcurridoMs / (3600 * 1000));
+        const minTarde   = Math.floor((transcurridoMs % (3600 * 1000)) / (60 * 1000));
+        const detalle    = horasTarde > 0 ? `${horasTarde}h ${minTarde}m` : `${minTarde}m`;
+        const justificacion = prompt(
+            `⚠ Esta tarea está vencida (${detalle} tarde).\n\nIngresa la justificación obligatoria del retraso:`
+        );
+        if (justificacion === null || justificacion.trim() === '') {
+            alert('No puedes completar una tarea vencida sin justificación.');
+            return;
+        }
+        task.justificacionRetraso = justificacion.trim();
+        task.fueTarde = true;
+    } else {
+        task.fueTarde = false;
+    }
 
     if (task.data) {
         task.results = { type: 'inventario', items: [] };
@@ -53,7 +86,7 @@ export function handleEjecutarTarea(e) {
     }
 
     task.status = 'completed';
-    task.completedAt = Date.now();
+    task.completedAt = ahora;
     if (task.assignedTo === 'TODOS') task.assignedTo = currentUser.id;
 
     // Si fue inventario, derivar mermas por cada dif negativo
@@ -61,14 +94,20 @@ export function handleEjecutarTarea(e) {
 
     document.getElementById('modal-ejecutar-tarea').classList.add('hidden');
     renderColaboradorTasks();
-    const sufijo = mermasCreadas > 0 ? ` (${mermasCreadas} merma${mermasCreadas>1?'s':''} registrada${mermasCreadas>1?'s':''})` : '';
-    showNotification(`Tarea completada${sufijo}.`);
+    const sufijoMerma  = mermasCreadas > 0 ? ` (${mermasCreadas} merma${mermasCreadas>1?'s':''} registrada${mermasCreadas>1?'s':''})` : '';
+    const sufijoTarde  = task.fueTarde ? ' — completada con retraso justificado' : '';
+    registrarAccion(currentUser.id, 'Completar tarea', `"${task.type}"${task.fueTarde ? ' (TARDE: ' + task.justificacionRetraso + ')' : ''}`);
+    showNotification(`Tarea completada${sufijoMerma}${sufijoTarde}.`);
 }
 
 window.abrirModalResultados = function(taskId) {
     const task = tasks.find(t => t.id === taskId);
+    let extraInfo = '';
+    if (task.fueTarde && task.justificacionRetraso) {
+        extraInfo = `<br><strong style="color:#ef4444;">⚠ Completada con retraso.</strong> Justificación: <em>"${task.justificacionRetraso}"</em>`;
+    }
     document.getElementById('res-desc').innerHTML =
-        `<strong>Tarea:</strong> ${task.type}<br><strong>Por:</strong> ${task.assignedTo}`;
+        `<strong>Tarea:</strong> ${task.type}<br><strong>Por:</strong> ${task.assignedTo}${extraInfo}`;
 
     const tbody    = document.getElementById('res-tbody');
     tbody.innerHTML = '';

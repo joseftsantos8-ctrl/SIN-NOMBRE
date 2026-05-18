@@ -17,10 +17,7 @@
         <section id="login-view" class="view active-view">
             <div class="login-container glass-panel">
                 <div class="login-header">
-                    <!-- Logo proporcionado -->
-                    <img src="logo.png" 
-                         onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Grupo_Ramos_logo.svg/1200px-Grupo_Ramos_logo.svg.png';" 
-                         class="logo-img" alt="Grupo Ramos" style="height: 80px; object-fit: contain;">
+                    <img src="imagen/logo.png" class="logo-img" alt="Grupo Ramos" style="height: 100px; object-fit: contain; margin-bottom: 0.5rem;">
                     <h2>Sirena Market Vista Cana SP13</h2>
                     <p>Gestión Operativa de Tienda</p>
                 </div>
@@ -43,7 +40,7 @@
         <section id="dashboard-view" class="view hidden">
             <nav class="sidebar glass-panel">
                 <div class="sidebar-header" style="justify-content: center; margin-bottom: 1rem;">
-                    <img src="logo.png" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Grupo_Ramos_logo.svg/1200px-Grupo_Ramos_logo.svg.png';" alt="Logo" style="height: 40px;">
+                    <img src="imagen/logo.png" alt="Grupo Ramos" style="height: 50px; object-fit: contain;">
                 </div>
                 
                 <div class="user-info">
@@ -376,6 +373,108 @@
         </div>
 
     </div>
+
+        <!-- MODAL: Pedido de Vegetales -->
+        <div id="modal-pedido-vegetales" class="modal hidden">
+            <div class="modal-content glass-panel" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+                <h3><i class="fa-solid fa-carrot"></i> Pedido de Vegetales</h3>
+                <p style="color:var(--text-secondary); margin-bottom:1rem;">Cantidad solicitada por <strong>canastos</strong>. Deja en 0 lo que no necesites.</p>
+                <form id="form-pedido-vegetales">
+                    <div id="pedido-veg-lista" style="max-height: 350px; overflow-y: auto; margin-bottom: 1rem;"></div>
+                    <textarea id="pedido-veg-notas" rows="2" placeholder="Notas adicionales (opcional)" style="width:100%; padding:0.6rem; background:rgba(0,0,0,0.2); border:none; border-radius:8px; color:white; margin-bottom:1rem;"></textarea>
+                    <h4 style="margin:0.5rem 0;"><i class="fa-solid fa-clock-rotate-left"></i> Pedidos recientes</h4>
+                    <div id="pedido-veg-historial" style="margin-bottom: 1rem;"></div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" onclick="document.getElementById('modal-pedido-vegetales').classList.add('hidden')">Cancelar</button>
+                        <button type="submit" class="btn-primary"><i class="fa-solid fa-paper-plane"></i> Enviar Pedido</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- MODAL: Pedido de Carnes -->
+        <div id="modal-pedido-carnes" class="modal hidden">
+            <div class="modal-content glass-panel" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+                <h3><i class="fa-solid fa-drumstick-bite"></i> Pedido de Carnes</h3>
+                <p style="color:var(--text-secondary); margin-bottom:1rem;">Cantidad solicitada por <strong>libras (LB)</strong>. Deja en 0 lo que no necesites.</p>
+                <form id="form-pedido-carnes">
+                    <div id="pedido-car-lista" style="max-height: 350px; overflow-y: auto; margin-bottom: 1rem;"></div>
+                    <textarea id="pedido-car-notas" rows="2" placeholder="Notas adicionales (opcional)" style="width:100%; padding:0.6rem; background:rgba(0,0,0,0.2); border:none; border-radius:8px; color:white; margin-bottom:1rem;"></textarea>
+                    <h4 style="margin:0.5rem 0;"><i class="fa-solid fa-clock-rotate-left"></i> Pedidos recientes</h4>
+                    <div id="pedido-car-historial" style="margin-bottom: 1rem;"></div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" onclick="document.getElementById('modal-pedido-carnes').classList.add('hidden')">Cancelar</button>
+                        <button type="submit" class="btn-primary"><i class="fa-solid fa-paper-plane"></i> Enviar Pedido</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- MODAL: Levantamiento de Frescos -->
+        <div id="modal-levantamiento-frescos" class="modal hidden">
+            <div class="modal-content glass-panel" style="max-width: 900px; max-height: 92vh; overflow-y: auto;">
+                <h3><i class="fa-solid fa-fish-fins"></i> Levantamiento de Frescos</h3>
+                <p style="color:var(--text-secondary); margin-bottom:1rem;">Audita la frescura, presentación, precio y temperatura de productos por área.</p>
+                <form id="form-agregar-fila-lev" style="background:rgba(0,0,0,0.15); padding:1rem; border-radius:10px; margin-bottom:1rem;">
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.5rem; margin-bottom:0.5rem;">
+                        <select id="lev-area" required style="padding:0.5rem; background:rgba(0,0,0,0.3); color:white; border:none; border-radius:6px;"></select>
+                        <input type="text" id="lev-producto" placeholder="Producto" required style="padding:0.5rem; background:rgba(0,0,0,0.3); color:white; border:none; border-radius:6px;">
+                        <input type="text" id="lev-precio" placeholder="Precio (opcional)" style="padding:0.5rem; background:rgba(0,0,0,0.3); color:white; border:none; border-radius:6px;">
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr auto; gap:0.5rem; align-items:end;">
+                        <div>
+                            <label style="display:block; font-size:0.75rem; color:var(--text-secondary);">Frescura</label>
+                            <select id="lev-frescura" style="width:100%; padding:0.4rem; background:rgba(0,0,0,0.3); color:white; border:none; border-radius:6px;"></select>
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:0.75rem; color:var(--text-secondary);">Presentación</label>
+                            <select id="lev-presentacion" style="width:100%; padding:0.4rem; background:rgba(0,0,0,0.3); color:white; border:none; border-radius:6px;"></select>
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:0.75rem; color:var(--text-secondary);">Temp. °C</label>
+                            <input type="number" step="0.1" id="lev-temperatura" placeholder="—" style="width:100%; padding:0.4rem; background:rgba(0,0,0,0.3); color:white; border:none; border-radius:6px;">
+                        </div>
+                        <input type="text" id="lev-observacion" placeholder="Observación" style="padding:0.5rem; background:rgba(0,0,0,0.3); color:white; border:none; border-radius:6px;">
+                        <button type="submit" class="btn-primary" style="padding:0.5rem 0.8rem;"><i class="fa-solid fa-plus"></i> Agregar</button>
+                    </div>
+                </form>
+                <table class="custom-table" style="width:100%;">
+                    <thead><tr><th>Producto</th><th>Frescura</th><th>Presentación</th><th>Precio</th><th>Temp.</th><th>Obs / Acción</th></tr></thead>
+                    <tbody id="lev-tbody"></tbody>
+                </table>
+                <h4 style="margin:1rem 0 0.5rem;"><i class="fa-solid fa-clock-rotate-left"></i> Historial reciente</h4>
+                <div id="lev-historial" style="margin-bottom:1rem;"></div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="document.getElementById('modal-levantamiento-frescos').classList.add('hidden')">Cerrar</button>
+                    <button type="button" class="btn-primary" id="btn-guardar-levantamiento"><i class="fa-solid fa-save"></i> Guardar Levantamiento</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: Planos de Tienda -->
+        <div id="modal-planos" class="modal hidden">
+            <div class="modal-content glass-panel" style="max-width: 900px; max-height: 92vh; overflow-y: auto;">
+                <h3><i class="fa-solid fa-map-location-dot"></i> Planos de Tienda</h3>
+                <p style="color:var(--text-secondary); margin-bottom:1rem;">Visualiza, imprime o descarga los planos de la tienda.</p>
+                <div id="planos-lista"></div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="document.getElementById('modal-planos').classList.add('hidden')">Cerrar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: Auditoría -->
+        <div id="modal-auditoria" class="modal hidden">
+            <div class="modal-content glass-panel" style="max-width: 1000px; max-height: 92vh; overflow-y: auto;">
+                <h3><i class="fa-solid fa-clipboard-list"></i> Auditoría de Acciones</h3>
+                <p style="color:var(--text-secondary); margin-bottom:1rem;">Historial cronológico de acciones del sistema (logins, asignaciones, completados, pedidos, registros de merma, etc.).</p>
+                <input type="text" id="auditoria-filtro" placeholder="Filtrar por usuario, acción o detalle..." style="width:100%; padding:0.6rem; background:rgba(0,0,0,0.2); border:none; border-radius:8px; color:white; margin-bottom:1rem;">
+                <div id="auditoria-tabla"></div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="document.getElementById('modal-auditoria').classList.add('hidden')">Cerrar</button>
+                </div>
+            </div>
+        </div>
 
         <div id="modal-registrar-merma" class="modal hidden">
             <div class="modal-content glass-panel" style="max-width: 500px;">

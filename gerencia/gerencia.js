@@ -46,15 +46,17 @@ export function setupGerencia() {
     container.innerHTML = '';
     const grupos = {};
     for (const [id, user] of Object.entries(users)) {
-        if (!grupos[user.role]) grupos[user.role] = [];
-        grupos[user.role].push(`${user.name} (${id})`);
+        const cargo = user.cargo || user.role;
+        if (!grupos[cargo]) grupos[cargo] = [];
+        const areaText = user.area ? ` <small style="color:var(--text-secondary)">— ${user.area}</small>` : '';
+        grupos[cargo].push(`${user.name} (${id})${areaText}`);
     }
 
-    for (const [rolName, list] of Object.entries(grupos)) {
+    for (const [cargoName, list] of Object.entries(grupos)) {
         const card = document.createElement('div');
         card.className = 'role-group-card glass-panel';
         const lis = list.map(item => `<li><span><i class="fa-solid fa-user-check"></i> ${item}</span></li>`).join('');
-        card.innerHTML = `<h4>${rolName} (${list.length})</h4><ul class="role-group-list">${lis}</ul>`;
+        card.innerHTML = `<h4>${cargoName} (${list.length})</h4><ul class="role-group-list">${lis}</ul>`;
         container.appendChild(card);
     }
 }

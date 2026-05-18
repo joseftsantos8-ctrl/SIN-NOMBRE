@@ -58,7 +58,7 @@ function renderTablaLideres() {
     let html = `
         <table class="custom-table" style="width:100%;">
             <thead><tr>
-                <th>Líder</th><th>Rol</th><th>Asignadas</th><th>Completadas</th><th>Pendientes</th><th>Rendimiento</th>
+                <th>Líder</th><th>Cargo</th><th>Área</th><th>Asignadas</th><th>Completadas</th><th>Pendientes</th><th>Rendimiento</th>
             </tr></thead>
             <tbody>
     `;
@@ -69,7 +69,8 @@ function renderTablaLideres() {
         html += `
             <tr>
                 <td><strong>${u.name}</strong><br><small style="color:var(--text-secondary)">${id}</small></td>
-                <td>${u.role}</td>
+                <td>${u.cargo || u.role}</td>
+                <td><small style="color:var(--text-secondary)">${u.area || '—'}</small></td>
                 <td>${s.asignadas}</td>
                 <td>${s.completadas}</td>
                 <td>${s.pendientes}</td>
