@@ -14,10 +14,19 @@ import { handleEnviarPedidoVegetales } from './pedidos/vegetales.js';
 import { handleEnviarPedidoCarnes } from './pedidos/carnes.js';
 import { handleAgregarFilaLevantamiento, handleGuardarLevantamiento } from './frescos/levantamiento.js';
 import { handleFiltroAuditoria, registrarAccion } from './auditoria/auditoria.js';
+import { cargarTodo, resetearTodo } from './storage/persistencia.js';
+import { tasks } from './tareas/data.js';
+
+// --- Cargar estado persistido ANTES de cualquier render ---
+const fueRestaurado = cargarTodo();
+if (fueRestaurado) {
+    console.log('[Sirena] Estado restaurado desde localStorage.');
+}
 
 // Exponer para handlers inline en HTML dinámico
 window.abrirModalPerfil = abrirModalPerfil;
 window.abrirModalNegativos = abrirModalNegativos;
+window.resetearSistema = resetearTodo;
 
 // --- Fecha en header ---
 document.getElementById('current-date').textContent = new Date().toLocaleDateString('es-ES', {
@@ -35,6 +44,8 @@ document.getElementById('login-form').addEventListener('submit', (e) => {
         document.getElementById('login-error').classList.add('hidden');
         registrarAccion(userId, 'Login exitoso', `Rol: ${user.role}`);
         showDashboard();
+        // Notificaciones de tareas tras login
+        setTimeout(() => notificarTareasUsuario(userId), 800);
     } else {
         registrarAccion(userId || '(desconocido)', 'Login fallido', '');
         document.getElementById('login-error').classList.remove('hidden');
@@ -143,6 +154,20 @@ document.getElementById('btn-guardar-levantamiento').addEventListener('click', h
 
 // --- Auditoría ---
 document.getElementById('auditoria-filtro').addEventListener('input', handleFiltroAuditoria);
+
+// --- Notificaciones de tareas para el usuario que acaba de loguear ---
+function notificarTareasUsuario(userId) {
+    const ahora = Date.now();
+    const propias = tasks.filter(t => t.assignedTo === userId || t.assignedTo === 'TODOS');
+    const pendientes = propias.filter(t => t.status === 'pending');
+    const vencidas   = pendientes.filter(t => t.dueAt && ahora > t.dueAt);
+
+    if (vencidas.length > 0) {
+        showNotification(`⚠ Tienes ${vencidas.length} tarea(s) VENCIDA(S).`);
+    } else if (pendientes.length > 0) {
+        showNotification(`Tienes ${pendientes.length} tarea(s) pendiente(s).`);
+    }
+}
 
 // --- Perfil de usuario ---
 document.getElementById('perfil-foto-input').addEventListener('change', function() {

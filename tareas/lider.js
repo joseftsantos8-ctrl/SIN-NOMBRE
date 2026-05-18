@@ -4,6 +4,7 @@ import { currentUser } from '../autenticacion/auth.js';
 import { addNavLink } from '../shell/navegacion.js';
 import { showNotification } from '../shell/notificaciones.js';
 import { registrarAccion } from '../auditoria/auditoria.js';
+import { guardarTodo } from '../storage/persistencia.js';
 
 export function setupLider() {
     document.getElementById('lider-panel').classList.remove('hidden');
@@ -85,6 +86,7 @@ export function handleNuevaTarea(e) {
         completedAt: null
     });
     const tareaCreada = tasks[tasks.length - 1];
+    guardarTodo();
     document.getElementById('modal-nueva-tarea').classList.add('hidden');
     e.target.reset();
     renderLiderTasks();

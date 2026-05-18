@@ -1,6 +1,8 @@
 // Pedidos de vegetales y carnes. Estado mutable compartido.
 // Catálogos predeterminados para los formularios.
 
+import { registrarColeccion, reemplazarArray, guardarTodo } from '../storage/persistencia.js';
+
 export const VEGETALES = [
     'Papa', 'Zanahoria', 'Tomate', 'Cebolla', 'Lechuga',
     'Ají morrón', 'Ajo', 'Limón', 'Plátano verde', 'Yuca',
@@ -29,4 +31,7 @@ export function registrarPedido(pedido) {
         estado: 'pendiente',
         ...pedido
     });
+    guardarTodo();
 }
+
+registrarColeccion('pedidos', () => pedidos, v => reemplazarArray(pedidos, v));

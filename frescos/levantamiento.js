@@ -1,10 +1,13 @@
 import { currentUser } from '../autenticacion/auth.js';
 import { showNotification } from '../shell/notificaciones.js';
 import { registrarAccion } from '../auditoria/auditoria.js';
+import { registrarColeccion, reemplazarArray, guardarTodo } from '../storage/persistencia.js';
 
 // Cada registro de levantamiento:
 // { id, fecha, area, evaluadoPor, items: [{producto, frescura, presentacion, precio, temperatura, observacion}] }
 export let levantamientos = [];
+
+registrarColeccion('levantamientos', () => levantamientos, v => reemplazarArray(levantamientos, v));
 
 const AREAS_FRESCOS = ['Carnicería', 'Deli', 'Lácteos', 'Frutas y vegetales', 'Panadería'];
 const ESCALA = [
@@ -110,6 +113,7 @@ export function handleGuardarLevantamiento() {
     });
     const ultimo = levantamientos[0];
     filasLevantamiento = [];
+    guardarTodo();
     registrarAccion(currentUser.id, 'Levantamiento de frescos', `Área: ${ultimo.area}, ${ultimo.items.length} producto(s)`);
     showNotification(`Levantamiento guardado (${ultimo.items.length} productos).`);
     document.getElementById('modal-levantamiento-frescos').classList.add('hidden');

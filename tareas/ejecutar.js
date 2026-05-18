@@ -4,6 +4,7 @@ import { showNotification } from '../shell/notificaciones.js';
 import { renderColaboradorTasks } from './colaborador.js';
 import { derivarMermasDeInventario } from '../mermas/calculo.js';
 import { registrarAccion } from '../auditoria/auditoria.js';
+import { guardarTodo } from '../storage/persistencia.js';
 
 let currentTaskExecuting = null;
 
@@ -92,6 +93,7 @@ export function handleEjecutarTarea(e) {
     // Si fue inventario, derivar mermas por cada dif negativo
     const mermasCreadas = derivarMermasDeInventario(task);
 
+    guardarTodo();
     document.getElementById('modal-ejecutar-tarea').classList.add('hidden');
     renderColaboradorTasks();
     const sufijoMerma  = mermasCreadas > 0 ? ` (${mermasCreadas} merma${mermasCreadas>1?'s':''} registrada${mermasCreadas>1?'s':''})` : '';

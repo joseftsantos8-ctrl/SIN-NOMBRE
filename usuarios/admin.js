@@ -3,6 +3,7 @@ import { addNavLink } from '../shell/navegacion.js';
 import { showNotification } from '../shell/notificaciones.js';
 import { currentUser } from '../autenticacion/auth.js';
 import { registrarAccion } from '../auditoria/auditoria.js';
+import { guardarTodo } from '../storage/persistencia.js';
 
 export function setupAdmin() {
     document.getElementById('admin-panel').classList.remove('hidden');
@@ -19,6 +20,7 @@ export function handleCrearUsuario(e) {
 
     if (users[id]) { alert('Este ID ya existe.'); return; }
     users[id] = { name, role, cargo: role, area: '', password: pass };
+    guardarTodo();
     registrarAccion(currentUser?.id || 'ADMIN', 'Crear usuario', `${id} (${name}) — ${role}`);
     showNotification(`Usuario ${name} creado.`);
     e.target.reset();

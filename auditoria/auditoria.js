@@ -1,6 +1,8 @@
 // Sistema simple de auditoría: registra acciones clave con usuario, fecha y detalle.
 // Cada entrada: { id, fecha, usuario, accion, detalle }
 
+import { registrarColeccion, reemplazarArray, guardarTodo } from '../storage/persistencia.js';
+
 export let auditoria = [];
 
 export function registrarAccion(usuario, accion, detalle = '') {
@@ -13,7 +15,10 @@ export function registrarAccion(usuario, accion, detalle = '') {
     });
     // Limite suave para no crecer indefinidamente en memoria
     if (auditoria.length > 500) auditoria.length = 500;
+    guardarTodo();
 }
+
+registrarColeccion('auditoria', () => auditoria, v => reemplazarArray(auditoria, v));
 
 function fmtFecha(ms) {
     return new Date(ms).toLocaleString('es-DO', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit' });

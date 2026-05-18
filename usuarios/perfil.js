@@ -1,6 +1,7 @@
 import { currentUser } from '../autenticacion/auth.js';
 import { users } from './data.js';
 import { showNotification } from '../shell/notificaciones.js';
+import { guardarTodo } from '../storage/persistencia.js';
 
 export function abrirModalPerfil() {
     const previewImg  = document.getElementById('perfil-preview-img');
@@ -25,6 +26,7 @@ export function handleGuardarPerfil(e) {
     if (!previewImg.classList.contains('hidden') && previewImg.src) {
         currentUser.profilePic = previewImg.src;
         users[currentUser.id].profilePic = previewImg.src;
+        guardarTodo();
         document.getElementById('sidebar-avatar').innerHTML =
             `<img src="${currentUser.profilePic}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
         showNotification('Foto de perfil actualizada exitosamente.');

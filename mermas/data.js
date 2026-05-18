@@ -3,6 +3,8 @@
 // motivo: 'Avería' | 'Vencimiento' | 'Robo' | 'Diferencia Inventario' | 'Otro'
 // origen: 'automático' | 'manual'
 
+import { registrarColeccion, reemplazarArray, guardarTodo } from '../storage/persistencia.js';
+
 const HOY = Date.now();
 const HORA = 3600 * 1000;
 const DIA  = 24 * HORA;
@@ -27,4 +29,7 @@ export function registrarMerma({ productoDesc, ean, cantidad, valor, motivo, ori
         motivo,
         origen
     });
+    guardarTodo();
 }
+
+registrarColeccion('mermas', () => mermas, v => reemplazarArray(mermas, v));

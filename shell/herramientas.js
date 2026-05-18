@@ -6,6 +6,7 @@ import { abrirModalPedidoCarnes } from '../pedidos/carnes.js';
 import { abrirModalLevantamientoFrescos } from '../frescos/levantamiento.js';
 import { abrirModalPlanos } from '../planos/planos.js';
 import { abrirModalAuditoria } from '../auditoria/auditoria.js';
+import { resetearTodo } from '../storage/persistencia.js';
 
 const roleOptions = {
     'Colaborador': [
@@ -78,7 +79,8 @@ const roleOptions = {
         { icon: 'fa-shield-halved', title: 'Seguridad',          action: () => alert('Sistemas operando al 100% sin brechas de seguridad.') },
         { icon: 'fa-plus-circle',   title: 'Añadir Artículo',    action: () => document.getElementById('modal-add-article').classList.remove('hidden') },
         { icon: 'fa-clipboard-list',title: 'Auditoría',          action: abrirModalAuditoria },
-        { icon: 'fa-map-location-dot', title: 'Planos de Tienda', action: abrirModalPlanos }
+        { icon: 'fa-map-location-dot', title: 'Planos de Tienda', action: abrirModalPlanos },
+        { icon: 'fa-rotate-left',   title: 'Reset Sistema',      action: resetearTodo }
     ]
 };
 

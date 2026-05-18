@@ -5,6 +5,7 @@ import { addNavLink } from '../shell/navegacion.js';
 import { showNotification } from '../shell/notificaciones.js';
 import { asignaciones, setAsignacion } from './asignaciones.js';
 import { dividirProductos } from './division.js';
+import { guardarTodo } from '../storage/persistencia.js';
 
 function getColaboradores() {
     return Object.entries(users)
@@ -126,6 +127,7 @@ export function enviarInventarioManual() {
         resumen.push(`${colabId}: ${prods.length}`);
     });
 
+    guardarTodo();
     showNotification(`${creadas} tareas creadas — ${resumen.join(' | ')}`);
     document.getElementById('inventario-panel').classList.add('hidden');
     checks.forEach(c => c.checked = false);

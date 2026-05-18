@@ -1,4 +1,6 @@
 // Tareas seed con timestamps para alimentar el dashboard ejecutivo.
+import { registrarColeccion, reemplazarArray } from '../storage/persistencia.js';
+
 const HOY  = Date.now();
 const HORA = 3600 * 1000;
 const DIA  = 24 * HORA;
@@ -44,3 +46,6 @@ export let tasks = [
 ];
 
 export let novedades = [];
+
+registrarColeccion('tasks',     () => tasks,     v => reemplazarArray(tasks, v));
+registrarColeccion('novedades', () => novedades, v => reemplazarArray(novedades, v));

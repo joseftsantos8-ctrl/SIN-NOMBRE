@@ -3,9 +3,12 @@ import { tasks } from '../tareas/data.js';
 import { asignaciones } from './asignaciones.js';
 import { dividirProductos } from './division.js';
 import { showNotification } from '../shell/notificaciones.js';
+import { registrarColeccion, reemplazarArray, guardarTodo } from '../storage/persistencia.js';
 
 // Lista global de negativos pendientes (productos físicos no listados)
 export let negativos = [];
+
+registrarColeccion('negativos', () => negativos, v => reemplazarArray(negativos, v));
 
 function getColaboradores() {
     return Object.entries(users)
@@ -53,6 +56,7 @@ export function handleAgregarNegativo(e) {
     const cat  = document.getElementById('neg-cat').value.trim() || 'General';
     if (!ean || !desc) return;
     negativos.push({ ean, desc, cat, stock: 0, origen: 'A.FISH' });
+    guardarTodo();
     document.getElementById('neg-ean').value = '';
     document.getElementById('neg-desc').value = '';
     document.getElementById('neg-cat').value = '';
@@ -66,8 +70,8 @@ export function repartirNegativos() {
 
     const reparto = dividirProductos(negativos, asignaciones, colabs);
     let creadas = 0;
-
     const ahora = Date.now();
+
     Object.entries(reparto).forEach(([colabId, prods]) => {
         if (prods.length === 0) return;
         tasks.push({
@@ -86,6 +90,7 @@ export function repartirNegativos() {
     });
 
     negativos.length = 0;
+    guardarTodo();
     renderListaNegativos();
     showNotification(`${creadas} tarea(s) de negativos creadas.`);
     document.getElementById('modal-negativos').classList.add('hidden');
@@ -99,5 +104,6 @@ window.reportarNegativoDesdeColaborador = function() {
     if (!desc) return;
     const cat  = prompt('Categoría (opcional, ej: Lácteos):') || 'General';
     negativos.push({ ean: ean.trim(), desc: desc.trim(), cat: cat.trim(), stock: 0, origen: 'colaborador' });
+    guardarTodo();
     showNotification('Negativo reportado. A.FISH lo verá al gestionarlos.');
 };

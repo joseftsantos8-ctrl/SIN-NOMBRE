@@ -3,6 +3,8 @@
 // - `cargo`    : título OFICIAL según el doc de requerimientos (se muestra al usuario).
 // - `area`     : área asignada (opcional, se muestra en tablas).
 // - `password` : credencial demo.
+import { registrarColeccion, reemplazarObjeto } from '../storage/persistencia.js';
+
 export let users = {
     'ADMIN':      { name: 'Super Administrador',           role: 'Admin',                  cargo: 'Super Administrador',                                  area: '',                          password: '1234' },
     'F.CEBALLOS': { name: 'Francois Ceballos',             role: 'Gerente',                cargo: 'Líder de Tienda',                                      area: '',                          password: '1234' },
@@ -17,3 +19,5 @@ export let users = {
     'L.FRESCOS':  { name: 'Luis Frescos',                  role: 'Líder de Frescos',       cargo: 'Líder de Frescos',                                     area: '',                          password: '1234' },
     'J.ARECHE':   { name: 'Jeneufry Areche de los Santos', role: 'POP',                    cargo: 'Señalización & Suministros',                           area: '',                          password: '1234' }
 };
+
+registrarColeccion('users', () => users, v => reemplazarObjeto(users, v));
